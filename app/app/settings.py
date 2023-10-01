@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+import json
+
+load_dotenv()
+env = os.environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,8 +31,7 @@ SECRET_KEY = 'django-insecure-3q5m3aod4#!cdt=kwc%h4wpkf65wk-3e_301bi7l9t5j%7m)+x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["http://web-django.eba-ch3dwa3n.us-east-1.elasticbeanstalk.com","127.0.0.1",
-                 "web-django.eba-ch3dwa3n.us-east-1.elasticbeanstalk.com"]
+ALLOWED_HOSTS = json.loads(env.get("ALLOWED_HOSTS"))
 
 
 # Application definition
@@ -38,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'auths.apps.AuthsConfig',
 ]
 
 MIDDLEWARE = [
@@ -75,9 +81,31 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'default': {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env.get("RDS_DB_NAME"),
+            "USER": env.get("RDS_USERNAME"),
+            "PASSWORD": env.get("RDS_PASSWORD"),
+            "HOST": env.get("RDS_HOSTNAME"),
+            "PORT": env.get("RDS_PORT"),
+            "TEST": {
+                "NAME": env.get("DEFAULT_TEST_DATABASE_NAME"),
+                "TEST_PASS": env.get("TEST_PASS"),
+                "TEST_EMAIL": env.get("TEST_EMAIL")
+            },
+        },
+        'local': {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env.get("DEFAULT_DATABASE_NAME"),
+            "USER": env.get("DEFAULT_DATABASE_USERNAME"),
+            "PASSWORD": env.get("DEFAULT_DATABASE_PASSWORD"),
+            "HOST": env.get("DEFAULT_DATABASE_HOST"),
+            "PORT": env.get("DEFAULT_DATABASE_PORT"),
+            "TEST": {
+                "NAME": env.get("DEFAULT_TEST_DATABASE_NAME"),
+                "TEST_PASS": env.get("TEST_PASS"),
+                "TEST_EMAIL": env.get("TEST_EMAIL")
+        },
     }
 }
 
@@ -115,11 +143,15 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATIC_URL = 'static/'
-STATIC_ROOT = 'static'
+STATIC_URL = 'assets/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+
+STATICFILES_DIRS =  [ os.path.join(BASE_DIR,'static')]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = "auths.User"
