@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-3q5m3aod4#!cdt=kwc%h4wpkf65wk-3e_301bi7l9t5j%7m)+x'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = json.loads(env.get("ALLOWED_HOSTS"))
 
@@ -85,33 +85,36 @@ DATABASES = {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": env.get("RDS_DB_NAME"),
         },
-        'default': {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": env.get("RDS_DB_NAME"),
-            "USER": env.get("RDS_USERNAME"),
-            "PASSWORD": env.get("RDS_PASSWORD"),
-            "HOST": env.get("RDS_HOSTNAME"),
-            "PORT": env.get("RDS_PORT"),
-            "TEST": {
-                "NAME": env.get("DEFAULT_TEST_DATABASE_NAME"),
-                "TEST_PASS": env.get("TEST_PASS"),
-                "TEST_EMAIL": env.get("TEST_EMAIL")
-            },
-        },
-        'local': {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": env.get("DEFAULT_DATABASE_NAME"),
-            "USER": env.get("DEFAULT_DATABASE_USERNAME"),
-            "PASSWORD": env.get("DEFAULT_DATABASE_PASSWORD"),
-            "HOST": env.get("DEFAULT_DATABASE_HOST"),
-            "PORT": env.get("DEFAULT_DATABASE_PORT"),
-            "TEST": {
-                "NAME": env.get("DEFAULT_TEST_DATABASE_NAME"),
-                "TEST_PASS": env.get("TEST_PASS"),
-                "TEST_EMAIL": env.get("TEST_EMAIL")
+}
+if DEBUG:
+    DATABASES['default']= {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env.get("DEFAULT_DATABASE_NAME"),
+        "USER": env.get("DEFAULT_DATABASE_USERNAME"),
+        "PASSWORD": env.get("DEFAULT_DATABASE_PASSWORD"),
+        "HOST": env.get("DEFAULT_DATABASE_HOST"),
+        "PORT": env.get("DEFAULT_DATABASE_PORT"),
+        "TEST": {
+            "NAME": env.get("DEFAULT_TEST_DATABASE_NAME"),
+            "TEST_PASS": env.get("TEST_PASS"),
+            "TEST_EMAIL": env.get("TEST_EMAIL")
         },
     }
-}
+
+else:
+    DATABASES['default']= {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env.get("RDS_DB_NAME"),
+        "USER": env.get("RDS_USERNAME"),
+        "PASSWORD": env.get("RDS_PASSWORD"),
+        "HOST": env.get("RDS_HOSTNAME"),
+        "PORT": env.get("RDS_PORT"),
+        "TEST": {
+            "NAME": env.get("DEFAULT_TEST_DATABASE_NAME"),
+            "TEST_PASS": env.get("TEST_PASS"),
+            "TEST_EMAIL": env.get("TEST_EMAIL")
+        },
+    }
 
 
 # Password validation
