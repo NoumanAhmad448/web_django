@@ -1,3 +1,4 @@
 web_django
 django_debug
 eb_logs.log
+.env
