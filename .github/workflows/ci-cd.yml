@@ -45,16 +45,16 @@ jobs:
 
       - name: copy settings.py and .env files
         run: |
-          cp .env.backup .env
+          cp app/.env.backup app/.env
 
       - name: Install requirements
-        run: pip install -r requirements.txt
+        run: pip install -r app/requirements.txt
 
       - name: Run Migrations
-        run: python manage.py migrate
+        run: python app/manage.py migrate
 
       - name: Run Test
-        run: python manage.py test
+        run: python app/manage.py test
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
