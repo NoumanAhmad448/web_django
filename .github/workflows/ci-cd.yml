@@ -43,7 +43,7 @@ jobs:
 
       - name: copy settings.py and .env files
         run: |
-          cp .env.backup .env
+          cp app/.env.backup app/.env
 
       - name: Install requirements
         run: pip install -r requirements.txt
