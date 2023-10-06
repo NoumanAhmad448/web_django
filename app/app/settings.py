@@ -81,13 +81,13 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-        'default1': {
+        'default': {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": env.get("RDS_DB_NAME"),
+            "NAME": env.get("DEFAULT_DATABASE_NAME"),
         },
 }
 if DEBUG:
-    DATABASES['default']= {
+    DATABASES['default1']= {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env.get("DEFAULT_DATABASE_NAME"),
         "USER": env.get("DEFAULT_DATABASE_USERNAME"),
@@ -102,7 +102,7 @@ if DEBUG:
     }
 
 else:
-    DATABASES['default']= {
+    DATABASES['default1']= {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env.get("RDS_DB_NAME"),
         "USER": env.get("RDS_USERNAME"),

@@ -1,0 +1,81 @@
+name: Deployment
+
+on:
+  push:
+    branches: ["master"]
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.10]
+        appname: ['ec2_user_django_at_lyskills']
+        deploy-group: ['staging']
+        s3-bucket: ['bucket-ec2-user-django-at-lyskills']
+        s3-filename: ['ec2_user_django_at_lyskills-${{ github.sha }}']
+
+    services:
+
+      redis:
+        image: redis
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Check Python version
+        run: python --version
+
+      - name: Create Virtual Env
+        run: |
+          python3 -m venv test-django3
+          source test-django3/bin/activate
+
+      - name: copy settings.py and .env files
+        run: |
+          cp .env.backup .env
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run Migrations
+        run: python manage.py migrate
+
+      - name: Run Test
+        run: python manage.py test
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Deploy push to AWS S3
+      - name: AWS Deploy push
+        run: |
+          aws deploy push \
+          --application-name ${{ matrix.appname }} \
+          --description "This is a revision for the ${{ matrix.appname }}-${{ github.sha }}" \
+          --ignore-hidden-files \
+          --s3-location s3://${{ matrix.s3-bucket }}/${{ matrix.s3-filename }}.zip \
+          --source .
+      # Create deployment to CodeDeploy
+      - name: AWS Create Deployment
+        run: |
+          aws deploy create-deployment \
+           --application-name ${{ matrix.appname }} \
+           --deployment-config-name CodeDeployDefault.OneAtATime \
+           --deployment-group-name ${{ matrix.deploy-group }} \
+           --file-exists-behavior OVERWRITE \
+           --s3-location bucket=${{ matrix.s3-bucket }},key=${{ matrix.s3-filename }}.zip,bundleType=zip \
