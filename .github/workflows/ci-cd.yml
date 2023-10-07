@@ -66,9 +66,9 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       # Delete the existed s3
-      - name: AWS Deploy push
+      - name: AWS clean s3 bucket
         run : |
-            aws s3 rm ${{ matrix.s3-bucket }} --recursive
+            aws s3 rm s3://${{ matrix.s3-bucket }} --recursive
       # Deploy push to AWS S3
       - name: AWS Deploy push
         run: |
